@@ -1,36 +1,103 @@
-# ShieldVPN — Flutter Client (Build Pass 1)
+# ShieldVPN
 
-VPN client built with Flutter, Riverpod, GoRouter, and Material 3. Android supports importing
-WireGuard profiles and establishing a native tunnel. Authentication is still mock-backed.
+ShieldVPN is a Flutter-based VPN client prototype focused on secure access, modern mobile UI, and a clean architecture for future production integration.
 
-## What's included in this pass
+This project demonstrates a full-stack product direction: a mobile-first VPN experience, role-aware authentication flows, and a backend contract designed for secure connectivity and profile management.
 
-- **Core**: theme (light/dark, Material 3, glass helper), GoRouter with an auth-aware redirect guard, app-wide constants.
-- **Auth**: Login, Register, Forgot Password, OTP screens; `AuthRepository` interface + `MockAuthRepository`; Google/Apple sign-in buttons wired to stub flows.
-- **Onboarding**: 4-page animated onboarding (Fast VPN / Secure Browsing / Global Servers / Privacy Protection).
-- **Home**: large animated connect button, live status card (IP, ping, upload/download, duration, protocol), server picker entry point.
-- **Servers**: searchable, filterable (streaming/gaming/P2P/etc.), sortable (fastest/lowest load/A–Z) server list with favorites and recents, shimmer loading state.
-- **VPN state**: Android WireGuard tunnel via `wireguard_flutter`; imported `.conf` profiles are stored with `flutter_secure_storage`. Browser builds are UI-only. IP, ping, and throughput are not fabricated and remain unavailable until real measurements are implemented.
+## Overview
 
-Not yet built (next passes): iOS and Windows tunnel integrations, backend server catalog,
-Map view, Speed Test, Settings, Account/Subscription, Admin panel, push notifications,
-biometric login, localization, CI/CD. See `docs/ARCHITECTURE.md`.
+ShieldVPN includes:
 
-## Getting started
+- Material 3-based UI with light/dark theme support
+- Authentication screens for login, registration, password reset, and OTP flows
+- Guided onboarding experience for app setup and trust-building
+- Home dashboard with connection status and server selection
+- Server catalog with search, sorting, and filtering
+- Android WireGuard support for importing and connecting via .conf profiles
+- A clean, repository-based architecture designed for future backend and real VPN infrastructure integration
 
-> This project was authored as source files; it hasn't been run through `flutter create` /
-> `flutter pub get` in this environment (no Flutter SDK / pub.dev access here). Do this locally:
+## Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| Mobile App | Flutter, Dart |
+| State Management | Riverpod |
+| Navigation | GoRouter |
+| UI | Material 3 |
+| VPN Integration | WireGuard for Android |
+| Backend Contract | Node.js + SQLite API design |
+| Security | Secure storage, JWT-based auth model |
+
+## Current Status
+
+This repo is a polished MVP/client foundation rather than a production-ready VPN service.
+
+### Included
+
+- App shell and core navigation
+- Onboarding and auth experiences
+- Server listing and filtering
+- Android VPN profile import flow
+- Clean repository and provider architecture
+
+### Planned / Not Yet Implemented
+
+- Full production backend deployment
+- Real server provisioning and live tunnel management
+- iOS and Windows tunnel support
+- Payments and subscriptions
+- Push notifications
+- Real analytics and crash reporting
+- CI/CD pipeline and production hardening
+
+## Project Structure
+
+```text
+.
+├── android/
+├── assets/
+├── backend/
+├── docs/
+├── lib/
+├── test/
+├── web/
+├── .gitignore
+├── analysis_options.yaml
+├── pubspec.yaml
+├── pubspec.lock
+├── README.md
+└── LICENSE
+```
+
+## Local Development
+
+### Prerequisites
+
+- Flutter 3.22+
+- Dart 3.3+
+- Android Studio for Android testing
+
+### Install dependencies
 
 ```bash
-flutter --version        # Flutter 3.22+ / Dart 3.3+
-cd vpn_app
 flutter pub get
+```
+
+### Run the app
+
+```bash
 flutter run
 ```
 
-## Local backend
+For web preview:
 
-The `backend/` directory contains a local Node.js 24 + SQLite API. Start it in one terminal:
+```bash
+flutter run -d chrome
+```
+
+## Local Backend
+
+The backend folder includes a local Node.js API for testing auth and server metadata flows.
 
 ```powershell
 cd backend
@@ -40,62 +107,63 @@ $env:CODE_SECRET = 'replace-with-another-long-random-secret'
 npm start
 ```
 
-The API listens on `http://localhost:8080`. Start the Flutter web app in another terminal from
-the project root:
+The local API runs on:
+
+- http://localhost:8080
+
+Then run the app with the backend URL defined:
 
 ```powershell
 flutter run -d chrome --dart-define=BASE_API_URL=http://localhost:8080/v1
 ```
 
-Registration, password login, OTP verification, account profile, refresh-token rotation, and the
-server catalog use the local API. In development, OTP codes and password-reset tokens are printed
-to the backend terminal because no email provider is configured. This is for local testing only;
-production requires HTTPS, strong secrets, a real email delivery provider, and explicit CORS origins.
-
-The server catalog starts empty. Create a bootstrap administrator, sign in, and use the protected
-`POST /v1/admin/servers` endpoint to add real server metadata. Server metadata alone cannot create
-a tunnel: `/v1/connections` remains unavailable until a secure WireGuard peer/config provisioner
-is implemented and real VPN server infrastructure is configured. Google/Apple login, payments,
-and push notifications also require their external providers.
-
-Generate the Android and web platform folders in this directory if they are missing:
-
-```bash
-flutter create --project-name vpn_app --org com.yourcompany .
-```
-(This won't overwrite `lib/`, `pubspec.yaml`, or `docs/`.)
-
 ## Android WireGuard
 
-Install Android Studio and its Android SDK, then connect an Android device with USB debugging
-enabled or start an emulator. In the app, open **Servers**, tap the import icon, and choose a
-WireGuard `.conf` file. The profile must include an `[Interface]` private key and address plus a
-`[Peer]` public key, allowed IPs, and endpoint. Profile secrets are stored in Android secure
-storage. On first connect, approve Android's VPN permission dialog.
+For Android device testing:
 
-The server list contains imported profiles only; the previous mock server catalog is not used for
-connections. The tunnel cannot be tested without a valid profile and reachable WireGuard server.
-The web build remains a UI demo because browsers cannot create a device VPN tunnel.
+1. Install Android Studio and the Android SDK.
+2. Connect a device or start an emulator.
+3. Open the app and import a valid WireGuard .conf profile.
+4. Grant Android VPN permissions when prompted.
 
-## Firebase setup (optional for this pass)
+The tunnel requires a valid profile and a reachable WireGuard server. Without real infrastructure, this remains a UI-ready and local-demo flow rather than a live production connection.
 
-Firebase Auth/Messaging/Analytics/Crashlytics are in `pubspec.yaml` but initialization in
-`main.dart` is commented out, since auth currently runs on `MockAuthRepository`. To wire up
-real Firebase:
+## Architecture Notes
 
-1. `flutterfire configure` to generate `lib/firebase_options.dart`.
-2. Uncomment the `Firebase.initializeApp(...)` block in `main.dart`.
-3. Implement `RemoteAuthRepository` using `firebase_auth` + your backend's `/auth/*` endpoints
-   (see `docs/BACKEND_GUIDE.md`), and swap it in via `authRepositoryProvider`.
+The application follows a clean architecture approach with clear separation between:
 
-## Backend
+- domain/data repositories
+- state providers
+- navigation logic
+- screen UI
 
-No server exists yet. `docs/BACKEND_GUIDE.md` specifies the full REST API contract and
-PostgreSQL schema the client already codes against, so a backend built to spec is a drop-in
-replacement for the mock repositories — no client code changes beyond swapping `Provider`
-overrides.
+For details, see:
 
-## Project structure
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/BACKEND_GUIDE.md](docs/BACKEND_GUIDE.md)
 
-See `docs/ARCHITECTURE.md` for the full layer breakdown and the pattern to follow when adding
-new screens/features.
+## Security and Production Notes
+
+This repo is intentionally built to show architecture and UX patterns, not to be a production VPN service yet.
+
+Important considerations for production include:
+
+- HTTPS everywhere
+- secure secret management
+- real email verification and OTP delivery
+- trusted backend and identity providers
+- explicit CORS configuration
+- secure WireGuard provisioning and tunnel lifecycle handling
+
+## Roadmap
+
+- Real backend integration
+- Secure profile provisioning
+- iOS and Windows support
+- Payment and user account flows
+- Monitoring and analytics
+- CI/CD and release automation
+
+## License
+
+This project is licensed under the MIT License.
