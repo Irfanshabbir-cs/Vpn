@@ -1,8 +1,20 @@
 # ShieldVPN
 
-ShieldVPN is a Flutter-based VPN client prototype focused on secure access, modern mobile UI, and a clean architecture for future production integration.
+![Flutter](https://img.shields.io/badge/Flutter-3.22+-02569B?logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-3.3+-0175C2?logo=dart&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-This project demonstrates a full-stack product direction: a mobile-first VPN experience, role-aware authentication flows, and a backend contract designed for secure connectivity and profile management.
+ShieldVPN is a modern Flutter VPN client prototype focused on secure access, polished UX, and scalable architecture for future production deployment.
+
+This project demonstrates a product-minded mobile experience with authentication flows, server discovery, secure profile handling, and a backend contract designed for real-world VPN infrastructure.
+
+## Why this project stands out
+
+- Modern mobile-first UI with Material 3 and adaptive theme support
+- Clean architecture using Riverpod and repository abstraction
+- Realistic VPN product flow from onboarding to connection management
+- Designed to evolve into a production-ready service without rewriting the app structure
+- Strong foundation for future backend integration, real tunnel provisioning, and platform expansion
 
 ## Overview
 
